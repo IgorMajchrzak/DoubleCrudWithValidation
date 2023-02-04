@@ -32,11 +32,11 @@
         <Button x:Name="UpdateBtn" Content="Update" HorizontalAlignment="Left" Height="37" Margin="10,54,0,0" VerticalAlignment="Top" Width="102" Click="UpdateBtn_Click"/>
         <Button x:Name="DeleteBtn" Content="Delete" HorizontalAlignment="Left" Height="37" Margin="10,96,0,0" VerticalAlignment="Top" Width="102" Click="DeleteBtn_Click"/>
         <Button x:Name="ReadBtn" Content="Read" HorizontalAlignment="Left" Height="37" Margin="10,138,0,0" VerticalAlignment="Top" Width="102" Click="ReadBtn_Click"/>
-        <Label Content="ID" HorizontalAlignment="Left" Margin="10,189,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
-        <Label Content="Name" HorizontalAlignment="Left" Margin="10,236,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
-        <Label Content="Description" HorizontalAlignment="Left" Margin="10,283,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
-        <Label Content="Price" HorizontalAlignment="Left" Margin="10,330,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
-        <Label Content="Number in stock" HorizontalAlignment="Left" Margin="10,377,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
+        <Label x:Name="Tbx1Lbl" Content="ID" HorizontalAlignment="Left" Margin="10,189,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
+        <Label x:Name="Tbx2Lbl" Content="Name" HorizontalAlignment="Left" Margin="10,236,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
+        <Label x:Name="Tbx3Lbl" Content="Description" HorizontalAlignment="Left" Margin="10,283,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
+        <Label x:Name="Tbx4Lbl" Content="Price" HorizontalAlignment="Left" Margin="10,330,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
+        <Label x:Name="Tbx5Lbl" Content="Number in stock" HorizontalAlignment="Left" Margin="10,377,0,0" VerticalAlignment="Top" Height="24" Width="131"/>
         <TextBox x:Name="Tbx1" HorizontalAlignment="Left" Height="23" Margin="10,213,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="131" IsEnabled="False"/>
         <TextBox x:Name="Tbx2" HorizontalAlignment="Left" Height="23" Margin="10,260,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="131"/>
         <TextBox x:Name="Tbx3" HorizontalAlignment="Left" Height="23" Margin="10,307,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="131"/>

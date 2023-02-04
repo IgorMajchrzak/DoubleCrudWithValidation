@@ -59,6 +59,12 @@ namespace DoubleCrudWithValidation
                     TableDisplay1.Visibility = Visibility.Visible;
                     TableDisplay2.Visibility = Visibility.Hidden;
                     Tbx5.Visibility = Visibility.Visible;
+
+                    Tbx2Lbl.Content = "Name";
+                    Tbx3Lbl.Content = "Description";
+                    Tbx4Lbl.Content = "Price";
+                    Tbx5Lbl.Content = "Number in stock";
+
                     return (result.DbType, new MysqlCrud($"datasource={result.Uri};port={result.Port};username={result.Username};password={result.Password}"));
                 }
                 else
@@ -66,6 +72,12 @@ namespace DoubleCrudWithValidation
                     TableDisplay2.Visibility = Visibility.Visible;
                     TableDisplay1.Visibility = Visibility.Hidden;
                     Tbx5.Visibility = Visibility.Hidden;
+
+                    Tbx2Lbl.Content = "First name";
+                    Tbx3Lbl.Content = "Last name";
+                    Tbx4Lbl.Content = "Age";
+                    Tbx5Lbl.Content = "";
+
                     return (result.DbType, new MongodbCrud($"mongodb+srv://{result.Username}:{result.Password}@{result.Uri}:{result.Port}"));
                 }
             }

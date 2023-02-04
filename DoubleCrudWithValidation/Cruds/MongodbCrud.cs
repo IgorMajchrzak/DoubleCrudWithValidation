@@ -13,41 +13,55 @@ namespace DoubleCrudWithValidation.Cruds
 {
     internal class MongodbCrud : IDbCrud
     {
-        private readonly MongoClient _client;
+        private readonly IMongoDatabase _database;
 
         public MongodbCrud(string connection)
         {
-            _client = new MongoClient(connection);
+            var client = new MongoClient(connection);
+            _database = client.GetDatabase("PeopleDb");
         }
 
         public void Create<T>(T toCreate) where T : struct
         {
-            throw new NotImplementedException();
+            var collection = _database.GetCollection<T>("People");
+            collection.InsertOne(toCreate);
         }
 
         public void Delete(int id)
         {
-            throw new NotImplementedException();
+            var collection = _database.GetCollection<Person>("People");
+            var filter = Builders<Person>.Filter.Eq("PersonId", id);
+            collection.DeleteOne(filter);
         }
 
         public List<T> Read<T>(int id)
         {
             //needs testing
-            var database = _client.GetDatabase("PeopleDb");
-            var peopleCollection = database.GetCollection<BsonDocument>("People");
-            var filter = Builders<BsonDocument>.Filter.Empty;
-            var documents = peopleCollection.Find(filter).ToList();
-            List<T> result = new List<T>();
-            foreach (var document in documents)
+            var peopleCollection = _database.GetCollection<Person>("People");
+            List<Person> result = new List<Person>();
+            if (id > 0)
             {
-                result.Add(BsonSerializer.Deserialize<T>(document));
+                var filter = Builders<Person>.Filter.Eq("PersonId", id);
+                var document = peopleCollection.Find(filter).FirstOrDefault();
+                result.Add(document);
             }
-            return result;
+            else
+            {
+                var filter = Builders<Person>.Filter.Empty;
+                result = peopleCollection.Find(filter).ToList();
+            }
+            return result as List<T>;
         }
-
+        
         public void Update<T>(T toUpdate) where T : struct
         {
-            throw new NotImplementedException();
+            if (toUpdate is Person updatedPerson)
+            {
+                var peopleCollection = _database.GetCollection<Person>("People");
+                var filter = Builders<Person>.Filter.Eq("PersonId", updatedPerson.PersonId);
+                peopleCollection.ReplaceOne(filter, updatedPerson);
+            }
+
         }
     }
 }
