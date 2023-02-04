@@ -42,6 +42,6 @@
         <TextBox x:Name="Tbx3" HorizontalAlignment="Left" Height="23" Margin="10,307,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="131"/>
         <TextBox x:Name="Tbx4" HorizontalAlignment="Left" Height="23" Margin="10,354,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="131"/>
         <TextBox x:Name="Tbx5" HorizontalAlignment="Left" Height="23" Margin="10,401,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="131"/>
-        <Button x:Name="DisconnectBtn" Content="Disconnect" HorizontalAlignment="Left" Height="38" Margin="688,412,0,0" VerticalAlignment="Top" Width="102" Click="DisconnectBtn_Click"/>
+        <Button x:Name="DisconnectBtn" Content="Disconnect" HorizontalAlignment="Right" Height="38" Margin="400,400,10,10" VerticalAlignment="Bottom" Width="102" Click="DisconnectBtn_Click"/>
     </Grid>
 </Window>

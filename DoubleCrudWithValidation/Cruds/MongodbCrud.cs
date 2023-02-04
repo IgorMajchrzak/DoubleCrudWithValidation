@@ -1,4 +1,7 @@
 ﻿using DoubleCrudWithValidation.Interfaces;
+using DoubleCrudWithValidation.Structs;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -29,7 +32,17 @@ namespace DoubleCrudWithValidation.Cruds
 
         public List<T> Read<T>(int id)
         {
-            throw new NotImplementedException();
+            //needs testing
+            var database = _client.GetDatabase("PeopleDb");
+            var peopleCollection = database.GetCollection<BsonDocument>("People");
+            var filter = Builders<BsonDocument>.Filter.Empty;
+            var documents = peopleCollection.Find(filter).ToList();
+            List<T> result = new List<T>();
+            foreach (var document in documents)
+            {
+                result.Add(BsonSerializer.Deserialize<T>(document));
+            }
+            return result;
         }
 
         public void Update<T>(T toUpdate) where T : struct
