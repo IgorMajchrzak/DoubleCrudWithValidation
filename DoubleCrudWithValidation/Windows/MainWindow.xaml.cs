@@ -15,9 +15,10 @@ using System.Windows.Shapes;
 
 using MySql.Data.MySqlClient;
 using MongoDB.Driver;
-using DoubleCrudWithValidation.Structs;
+using DoubleCrudWithValidation.Models;
 using DoubleCrudWithValidation.Interfaces;
 using DoubleCrudWithValidation.Cruds;
+using DoubleCrudWithValidation.StringBuilders;
 
 namespace DoubleCrudWithValidation
 {
@@ -33,9 +34,9 @@ namespace DoubleCrudWithValidation
         public MainWindow()
         {
             {
-                //items = new List<Product>();
                 InitializeComponent();
                 (_dbType, _currentCrud) = CrudSelection();
+
                 TableDisplay1.Items.Clear();
                 TableDisplay2.Items.Clear();
             }
@@ -58,6 +59,7 @@ namespace DoubleCrudWithValidation
                 {
                     TableDisplay1.Visibility = Visibility.Visible;
                     TableDisplay2.Visibility = Visibility.Hidden;
+                    Tbx5Lbl.Visibility = Visibility.Visible;
                     Tbx5.Visibility = Visibility.Visible;
 
                     Tbx2Lbl.Content = "Name";
@@ -65,12 +67,14 @@ namespace DoubleCrudWithValidation
                     Tbx4Lbl.Content = "Price";
                     Tbx5Lbl.Content = "Number in stock";
 
-                    return (result.DbType, new MysqlCrud($"datasource={result.Uri};port={result.Port};username={result.Username};password={result.Password}"));
+                    string connectionString = new MysqlConnectionStringBuilder(result.Uri, result.Port, result.Username, result.Password).ConnectionString();
+                    return (result.DbType, new MysqlCrud(connectionString));
                 }
                 else
                 {
                     TableDisplay2.Visibility = Visibility.Visible;
                     TableDisplay1.Visibility = Visibility.Hidden;
+                    Tbx5Lbl.Visibility = Visibility.Hidden;
                     Tbx5.Visibility = Visibility.Hidden;
 
                     Tbx2Lbl.Content = "First name";
@@ -78,7 +82,8 @@ namespace DoubleCrudWithValidation
                     Tbx4Lbl.Content = "Age";
                     Tbx5Lbl.Content = "";
 
-                    return (result.DbType, new MongodbCrud($"mongodb+srv://{result.Username}:{result.Password}@{result.Uri}:{result.Port}"));
+                    string connectionString = new MongodbConnectionStringBuilder(result.Uri, result.Port, result.Username, result.Password).ConnectionString();
+                    return (result.DbType, new MongodbCrud(connectionString));
                 }
             }
         }
@@ -101,24 +106,25 @@ namespace DoubleCrudWithValidation
             }
             else
             {
-                item = new Person { };
+                int age = int.TryParse(Tbx4.Text, out age) ? age : 0;
+                item = new Person { Id = Tbx1.Text, FirstName = Tbx2.Text, LastName = Tbx3.Text, Age = age};
             }
             return item;
         }
 
-        private void RefreshList(int id)
+        private void RefreshList(string idString)
         {
             if (_currentCrud == null) { return; }
 
             if (_dbType == "MySQL")
             {
-                _products = _currentCrud.Read<Product>(id);
+                _products = _currentCrud.Read<Product>(idString);
                 TableDisplay1.ItemsSource = _products;
                 TableDisplay1.SelectedItem = null;
             }
             else
             {
-                _people = _currentCrud.Read<Person>(id);
+                _people = _currentCrud.Read<Person>(idString);
                 TableDisplay2.ItemsSource = _people;
                 TableDisplay2.SelectedItem = null;
             }
@@ -126,8 +132,7 @@ namespace DoubleCrudWithValidation
 
         private void ReadBtn_Click(object sender, RoutedEventArgs e)
         {
-            int id = int.TryParse(Tbx1.Text, out id) ? id : -1;
-            RefreshList(id);
+            RefreshList(Tbx1.Text);
         }
 
         private void CreateBtn_Click(object sender, RoutedEventArgs e)
@@ -136,7 +141,7 @@ namespace DoubleCrudWithValidation
             dynamic item = ItemFromTextBoxes();
 
             _currentCrud.Create(item);
-            RefreshList(-1);
+            RefreshList("");
         }
 
         private void UpdateBtn_Click(object sender, RoutedEventArgs e)
@@ -145,17 +150,16 @@ namespace DoubleCrudWithValidation
             dynamic item = ItemFromTextBoxes();
 
             _currentCrud.Update(item);
-            RefreshList(-1);
+            RefreshList("");
         }
 
         private void DeleteBtn_Click(object sender, RoutedEventArgs e)
         {
             if (_currentCrud == null) { return; }
-            int id = int.TryParse(Tbx1.Text, out id) ? id : -1;
-            if (id > 0)
+            if (Tbx1.Text != "")
             {
-                _currentCrud.Delete(id);
-                RefreshList(-1);
+                _currentCrud.Delete(Tbx1.Text);
+                RefreshList("");
             }
         }
 
@@ -191,7 +195,7 @@ namespace DoubleCrudWithValidation
             }
             var item = (dynamic)TableDisplay2.SelectedItem;
 
-            Tbx1.Text = item.PersonId.ToString();
+            Tbx1.Text = item.Id;
             Tbx2.Text = item.FirstName;
             Tbx3.Text = item.LastName;
             Tbx4.Text = item.Age.ToString();

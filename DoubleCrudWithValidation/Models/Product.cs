@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DoubleCrudWithValidation.Structs
+namespace DoubleCrudWithValidation.Models
 {
-    public struct Product
+    public class Product
     {
         public int ProductId { get; set; }
         public string? Name { get; set; }

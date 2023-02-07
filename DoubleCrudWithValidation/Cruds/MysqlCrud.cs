@@ -1,5 +1,5 @@
 ﻿using DoubleCrudWithValidation.Interfaces;
-using DoubleCrudWithValidation.Structs;
+using DoubleCrudWithValidation.Models;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -18,7 +18,7 @@ namespace DoubleCrudWithValidation.Cruds
             _connection = new MySqlConnection(connection);
         }
 
-        public void Create<T>(T toCreate) where T : struct
+        public void Create<T>(T toCreate) where T : class
         {
             if (typeof(T) == typeof(Product))
             {
@@ -33,14 +33,19 @@ namespace DoubleCrudWithValidation.Cruds
             }
         }
 
-        public void Delete(int id)
+        public void Delete(string idString)
         {
-            string query = $"delete from shop.products where ProductId = {id};";
-            ExecuteQueryNoReturn(query);
+            int id = int.TryParse(idString, out id) ? id : -1;
+            if (id > 0)
+            {
+                string query = $"delete from shop.products where ProductId = {id};";
+                ExecuteQueryNoReturn(query);
+            }
         }
 
-        public List<T> Read<T>(int id)
+        public List<T> Read<T>(string idString)
         {
+            int id = int.TryParse(idString, out id) ? id : -1;
             string query;
             if (id < 0)
             {
@@ -69,7 +74,7 @@ namespace DoubleCrudWithValidation.Cruds
             return products as List<T>;
         }
 
-        public void Update<T>(T toUpdate) where T : struct
+        public void Update<T>(T toUpdate) where T : class
         {
             if (typeof(T) == typeof(Product))
             {

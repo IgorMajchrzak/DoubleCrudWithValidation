@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DoubleCrudWithValidation.Structs
+namespace DoubleCrudWithValidation.Models
 {
     public struct ConnectionInfo
     {

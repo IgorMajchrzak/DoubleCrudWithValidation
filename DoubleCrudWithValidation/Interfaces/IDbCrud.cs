@@ -8,12 +8,12 @@ namespace DoubleCrudWithValidation.Interfaces
 {
     internal interface IDbCrud
     {
-        public void Create<T>(T toCreate) where T : struct;
+        public void Create<T>(T toCreate) where T : class;
 
-        public List<T> Read<T>(int id);
+        public List<T> Read<T>(string idString);
 
-        public void Update<T>(T toUpdate) where T : struct;
+        public void Update<T>(T toUpdate) where T : class;
 
-        public void Delete(int id);
+        public void Delete(string idString);
     }
 }

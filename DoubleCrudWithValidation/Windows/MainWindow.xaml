@@ -21,9 +21,9 @@
         <ListView x:Name="TableDisplay2" Margin="173,10,10,60" SelectionChanged="TableDisplay2_SelectionChanged">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="ID" Width="50" DisplayMemberBinding="{Binding PersonId}"/>
+                    <GridViewColumn Header="ID" Width="200" DisplayMemberBinding="{Binding Id}"/>
                     <GridViewColumn Header="First name" Width="150" DisplayMemberBinding="{Binding FirstName}"/>
-                    <GridViewColumn Header="Last name" Width="270" DisplayMemberBinding="{Binding LastName}"/>
+                    <GridViewColumn Header="Last name" Width="150" DisplayMemberBinding="{Binding LastName}"/>
                     <GridViewColumn Header="Age" Width="50" DisplayMemberBinding="{Binding Age}"/>
                 </GridView>
             </ListView.View>

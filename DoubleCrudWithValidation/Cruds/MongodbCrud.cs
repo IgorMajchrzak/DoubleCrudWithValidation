@@ -1,5 +1,5 @@
 ﻿using DoubleCrudWithValidation.Interfaces;
-using DoubleCrudWithValidation.Structs;
+using DoubleCrudWithValidation.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -21,44 +21,43 @@ namespace DoubleCrudWithValidation.Cruds
             _database = client.GetDatabase("PeopleDb");
         }
 
-        public void Create<T>(T toCreate) where T : struct
+        public void Create<T>(T toCreate) where T : class
         {
             var collection = _database.GetCollection<T>("People");
             collection.InsertOne(toCreate);
         }
 
-        public void Delete(int id)
+        public void Delete(string idString)
         {
             var collection = _database.GetCollection<Person>("People");
-            var filter = Builders<Person>.Filter.Eq("PersonId", id);
+            var filter = Builders<Person>.Filter.Eq("Id", idString);
             collection.DeleteOne(filter);
         }
 
-        public List<T> Read<T>(int id)
+        public List<T> Read<T>(string idString)
         {
-            //needs testing
-            var peopleCollection = _database.GetCollection<Person>("People");
+            MongoCollectionBase<Person> peopleCollection = (MongoCollectionBase<Person>)_database.GetCollection<Person>("People");
             List<Person> result = new List<Person>();
-            if (id > 0)
+            if (idString != "")
             {
-                var filter = Builders<Person>.Filter.Eq("PersonId", id);
+                var filter = Builders<Person>.Filter.Eq("Id", idString);
                 var document = peopleCollection.Find(filter).FirstOrDefault();
                 result.Add(document);
             }
             else
             {
-                var filter = Builders<Person>.Filter.Empty;
-                result = peopleCollection.Find(filter).ToList();
+                var a = peopleCollection.Find(_ => true);
+                result = a.ToList();
             }
             return result as List<T>;
         }
         
-        public void Update<T>(T toUpdate) where T : struct
+        public void Update<T>(T toUpdate) where T : class
         {
             if (toUpdate is Person updatedPerson)
             {
                 var peopleCollection = _database.GetCollection<Person>("People");
-                var filter = Builders<Person>.Filter.Eq("PersonId", updatedPerson.PersonId);
+                var filter = Builders<Person>.Filter.Eq("Id", updatedPerson.Id);
                 peopleCollection.ReplaceOne(filter, updatedPerson);
             }
 

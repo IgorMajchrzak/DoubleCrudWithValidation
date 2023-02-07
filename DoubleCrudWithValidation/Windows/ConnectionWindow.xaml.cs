@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Threading;
 
-using DoubleCrudWithValidation.Structs;
+using DoubleCrudWithValidation.Models;
 
 namespace DoubleCrudWithValidation
 {
