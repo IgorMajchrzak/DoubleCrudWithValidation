@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DoubleCrudWithValidation"
         mc:Ignorable="d"
-        Title="Connect to database" Height="280" Width="320" ResizeMode="NoResize">
+        Title="Connect to database" Height="280" Width="320" ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen">
     <Grid>
         <Label Content="Address" HorizontalAlignment="Left" Height="26" Margin="10,45,0,0" VerticalAlignment="Top" Width="130"/>
         <Label Content="Username" HorizontalAlignment="Left" Height="26" Margin="10,114,0,0" VerticalAlignment="Top" Width="130"/>

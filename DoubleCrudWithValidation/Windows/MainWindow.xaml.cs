@@ -13,12 +13,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-using MySql.Data.MySqlClient;
-using MongoDB.Driver;
 using DoubleCrudWithValidation.Models;
 using DoubleCrudWithValidation.Interfaces;
 using DoubleCrudWithValidation.Cruds;
 using DoubleCrudWithValidation.StringBuilders;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Bson.Serialization;
 
 namespace DoubleCrudWithValidation
 {
@@ -34,11 +34,10 @@ namespace DoubleCrudWithValidation
         public MainWindow()
         {
             {
+                var objectSerializer = new ObjectSerializer(type => ObjectSerializer.DefaultAllowedTypes(type) || type.FullName.StartsWith("DoubleCrudWithValidation"));
+                BsonSerializer.RegisterSerializer(objectSerializer);
                 InitializeComponent();
                 (_dbType, _currentCrud) = CrudSelection();
-
-                TableDisplay1.Items.Clear();
-                TableDisplay2.Items.Clear();
             }
         }
 
@@ -53,8 +52,9 @@ namespace DoubleCrudWithValidation
             }
             else
             {
-                ConnectionWindow content = connectionWindow as ConnectionWindow;
+                ConnectionWindow content = connectionWindow;
                 ConnectionInfo result = content.Result;
+                IDbCrud dbCrud;
                 if (result.DbType == "MySQL")
                 {
                     TableDisplay1.Visibility = Visibility.Visible;
@@ -68,7 +68,7 @@ namespace DoubleCrudWithValidation
                     Tbx5Lbl.Content = "Number in stock";
 
                     string connectionString = new MysqlConnectionStringBuilder(result.Uri, result.Port, result.Username, result.Password).ConnectionString();
-                    return (result.DbType, new MysqlCrud(connectionString));
+                    dbCrud = new MysqlCrud(connectionString);
                 }
                 else
                 {
@@ -83,42 +83,91 @@ namespace DoubleCrudWithValidation
                     Tbx5Lbl.Content = "";
 
                     string connectionString = new MongodbConnectionStringBuilder(result.Uri, result.Port, result.Username, result.Password).ConnectionString();
-                    return (result.DbType, new MongodbCrud(connectionString));
+                    dbCrud = new MongodbCrud(connectionString);
                 }
+                return (result.DbType, dbCrud);
             }
         }
 
         private void Disconnect()
         {
+            _dbType = "";
             _currentCrud = null;
+            ClearLists();
+            ClearTextBoxes();
             (_dbType, _currentCrud) = CrudSelection();
         }
 
-        private dynamic ItemFromTextBoxes()
+        private static void CrudExceptionDisplay(Exception e)
         {
-            dynamic item;
+            string message = e.Message;
+            if (e.InnerException != null)
+            {
+                message += "\n" + e.InnerException.Message;
+            }
+            MessageBox.Show(message, "Operation failed", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        private IValidatable ItemFromTextBoxes()
+        {
+            IValidatable item;
             if (_dbType == "MySQL")
             {
                 int id = int.TryParse(Tbx1.Text, out id) ? id : -1;
-                double price = double.TryParse(Tbx4.Text, out price) ? price : 0;
+                decimal price = decimal.TryParse(Tbx4.Text, out price) ? price : 0;
                 int stock = int.TryParse(Tbx5.Text, out stock) ? stock : -1;
-                item = new Product { ProductId = id, Name = Tbx2.Text, Description = Tbx3.Text, Price = price, NumberInStock = stock };
+                item = new Product(id, Tbx2.Text, Tbx3.Text, price, stock);
             }
             else
             {
                 int age = int.TryParse(Tbx4.Text, out age) ? age : 0;
-                item = new Person { Id = Tbx1.Text, FirstName = Tbx2.Text, LastName = Tbx3.Text, Age = age};
+                string? id = null;
+                if (Tbx1.Text != "")
+                {
+                    id = Tbx1.Text;
+                }
+                item = new Person(id, Tbx2.Text, Tbx3.Text, age);
             }
             return item;
         }
 
+        private void ClearTextBoxes()
+        {
+            Tbx1.Text = "";
+            Tbx2.Text = "";
+            Tbx3.Text = "";
+            Tbx4.Text = "";
+            Tbx5.Text = "";
+        }
+
+        private void ClearLists()
+        {
+            _products.Clear();
+            _people.Clear();
+            TableDisplay1.ItemsSource = null;
+            TableDisplay1.SelectedItem = null;
+            TableDisplay2.ItemsSource = null;
+            TableDisplay2.SelectedItem = null;
+        }
+
         private void RefreshList(string idString)
         {
-            if (_currentCrud == null) { return; }
-
-            if (_dbType == "MySQL")
+            if (_currentCrud == null)
             {
-                _products = _currentCrud.Read<Product>(idString);
+                ClearTextBoxes();
+                ClearLists();
+            }
+            else if (_dbType == "MySQL")
+            {
+                try
+                {
+                    _products = _currentCrud.Read<Product>(idString);
+                }
+                catch (Exception ex)
+                {
+                    CrudExceptionDisplay(ex);
+                    return;
+                }
                 TableDisplay1.ItemsSource = _products;
                 TableDisplay1.SelectedItem = null;
             }
@@ -138,19 +187,47 @@ namespace DoubleCrudWithValidation
         private void CreateBtn_Click(object sender, RoutedEventArgs e)
         {
             if (_currentCrud == null) { return; }
-            dynamic item = ItemFromTextBoxes();
-
-            _currentCrud.Create(item);
-            RefreshList("");
+            IValidatable item = ItemFromTextBoxes();
+            if (item.Error == String.Empty)
+            {
+                try
+                {
+                    _currentCrud.Create(item);
+                }
+                catch (Exception ex)
+                {
+                    CrudExceptionDisplay(ex);
+                    return;
+                }
+                RefreshList("");
+            }
+            else
+            {
+                MessageBox.Show("Inputted item has following issues: \n" + item.Error, "Item validation error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void UpdateBtn_Click(object sender, RoutedEventArgs e)
         {
             if (_currentCrud == null) { return; }
-            dynamic item = ItemFromTextBoxes();
-
-            _currentCrud.Update(item);
-            RefreshList("");
+            IValidatable item = ItemFromTextBoxes();
+            if (item.Error == String.Empty)
+            {
+                try
+                {
+                    _currentCrud.Update(item);
+                }
+                catch (Exception ex)
+                {
+                    CrudExceptionDisplay(ex);
+                    return;
+                }
+                RefreshList("");
+            }
+            else
+            {
+                MessageBox.Show("Inputted item has following issues: \n" + item.Error, "Item validation error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         private void DeleteBtn_Click(object sender, RoutedEventArgs e)
@@ -158,7 +235,15 @@ namespace DoubleCrudWithValidation
             if (_currentCrud == null) { return; }
             if (Tbx1.Text != "")
             {
-                _currentCrud.Delete(Tbx1.Text);
+                try
+                {
+                    _currentCrud.Delete(Tbx1.Text);
+                }
+                catch (Exception ex)
+                {
+                    CrudExceptionDisplay(ex);
+                    return;
+                }
                 RefreshList("");
             }
         }
@@ -167,11 +252,7 @@ namespace DoubleCrudWithValidation
         {
             if (TableDisplay1.SelectedItem == null)
             {
-                Tbx1.Text = "";
-                Tbx2.Text = "";
-                Tbx3.Text = "";
-                Tbx4.Text = "";
-                Tbx5.Text = "";
+                ClearTextBoxes();
                 return;
             }
             var item = (dynamic)TableDisplay1.SelectedItem;
@@ -187,10 +268,7 @@ namespace DoubleCrudWithValidation
         {
             if (TableDisplay2.SelectedItem == null)
             {
-                Tbx1.Text = "";
-                Tbx2.Text = "";
-                Tbx3.Text = "";
-                Tbx4.Text = "";
+                ClearTextBoxes();
                 return;
             }
             var item = (dynamic)TableDisplay2.SelectedItem;

@@ -20,9 +20,8 @@ namespace DoubleCrudWithValidation.Cruds
 
         public void Create<T>(T toCreate) where T : class
         {
-            if (typeof(T) == typeof(Product))
+            if (toCreate is Product newProduct)
             {
-                Product newProduct = (Product)(object)toCreate;
                 string query = $"insert into shop.products (ProductName, Description, Price, NumberInStock) values('{newProduct.Name}','{newProduct.Description}','{newProduct.Price}','{newProduct.NumberInStock}');";
 
                 ExecuteQueryNoReturn(query);
@@ -58,27 +57,28 @@ namespace DoubleCrudWithValidation.Cruds
             List<Product> products = new List<Product>();
 
             MySqlCommand command = new MySqlCommand(query, _connection);
-            _connection.Open();
-            MySqlDataReader reader = command.ExecuteReader();
-            while (reader.Read())
+            try
             {
-                Product product = new Product();
-                product.ProductId = (int)reader[0];
-                product.Name = reader[1].ToString();
-                product.Description = reader[2].ToString();
-                product.Price = (double)reader[3];
-                product.NumberInStock = (int)reader[4];
-                products.Add(product);
+                _connection.Open();
+                MySqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    Product product = new Product((int)reader[0], reader[1].ToString(), reader[2].ToString(), (decimal)reader[3], (int)reader[4]);
+                    products.Add(product);
+                }
+                _connection.Close();
             }
-            _connection.Close();
+            catch (MySqlException e)
+            {
+                throw new Exception("An SQL exception occured.",e);
+            }
             return products as List<T>;
         }
 
         public void Update<T>(T toUpdate) where T : class
         {
-            if (typeof(T) == typeof(Product))
+            if (toUpdate is Product updatedProduct)
             {
-                Product updatedProduct = (Product)(object)toUpdate;
                 string query = $"update shop.products set ProductName='{updatedProduct.Name}',Description='{updatedProduct.Description}',Price='{updatedProduct.Price}',NumberInStock='{updatedProduct.NumberInStock}' where ProductId = {updatedProduct.ProductId};";
                 ExecuteQueryNoReturn(query);
             }

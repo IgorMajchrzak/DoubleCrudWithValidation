@@ -2,6 +2,7 @@
 using DoubleCrudWithValidation.Models;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace DoubleCrudWithValidation.Cruds
         {
             MongoCollectionBase<Person> peopleCollection = (MongoCollectionBase<Person>)_database.GetCollection<Person>("People");
             List<Person> result = new List<Person>();
-            if (idString != "")
+            if (idString != "" && idString.Length == 24)
             {
                 var filter = Builders<Person>.Filter.Eq("Id", idString);
                 var document = peopleCollection.Find(filter).FirstOrDefault();
